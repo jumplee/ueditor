@@ -1173,7 +1173,7 @@
                     return -1;
                 }
             }
-
+            return this._callCmdFn('queryCommandState', arguments);
 
         },
 
