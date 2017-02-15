@@ -304,34 +304,34 @@
             var _this = this,
                 $ = jQuery,    // just in case. Make sure it's not an other libaray.
                 $wrap = _this.$wrap,
-            // 图片容器
+                // 图片容器
                 $queue = $wrap.find('.filelist'),
-            // 状态栏，包括进度和控制按钮
+                // 状态栏，包括进度和控制按钮
                 $statusBar = $wrap.find('.statusBar'),
-            // 文件总体选择信息。
+                // 文件总体选择信息。
                 $info = $statusBar.find('.info'),
-            // 上传按钮
+                // 上传按钮
                 $upload = $wrap.find('.uploadBtn'),
-            // 上传按钮
+                // 上传按钮
                 $filePickerBtn = $wrap.find('.filePickerBtn'),
-            // 上传按钮
+                // 上传按钮
                 $filePickerBlock = $wrap.find('.filePickerBlock'),
-            // 没选择文件之前的内容。
+                // 没选择文件之前的内容。
                 $placeHolder = $wrap.find('.placeholder'),
-            // 总体进度条
+                // 总体进度条
                 $progress = $statusBar.find('.progress').hide(),
-            // 添加的文件数量
+                // 添加的文件数量
                 fileCount = 0,
-            // 添加的文件总大小
+                // 添加的文件总大小
                 fileSize = 0,
-            // 优化retina, 在retina下这个值是2
+                // 优化retina, 在retina下这个值是2
                 ratio = window.devicePixelRatio || 1,
-            // 缩略图大小
+                // 缩略图大小
                 thumbnailWidth = 113 * ratio,
                 thumbnailHeight = 113 * ratio,
-            // 可能有pedding, ready, uploading, confirm, done.
+                // 可能有pedding, ready, uploading, confirm, done.
                 state = '',
-            // 所有文件的进度信息，key为file id
+                // 所有文件的进度信息，key为file id
                 percentages = {},
                 supportTransition = (function () {
                     var s = document.createElement('p').style,
@@ -343,7 +343,7 @@
                     s = null;
                     return r;
                 })(),
-            // WebUploader实例
+                // WebUploader实例
                 uploader,
                 actionUrl = editor.getActionUrl(editor.getOpt('imageActionName')),
                 acceptExtensions = (editor.getOpt('imageAllowFiles') || []).join('').replace(/\./g, ',').replace(/^[,]/, ''),
@@ -366,7 +366,7 @@
                 accept: {
                     title: 'Images',
                     extensions: acceptExtensions,
-                    mimeTypes: 'image/*'
+                    mimeTypes: 'image/png, image/jpeg, image/gif'
                 },
                 swf: '../../third-party/webuploader/Uploader.swf',
                 server: actionUrl,
@@ -399,15 +399,15 @@
             // 当有文件添加进来时执行，负责view的创建
             function addFile(file) {
                 var $li = $('<li id="' + file.id + '">' +
-                    '<p class="title">' + file.name + '</p>' +
-                    '<p class="imgWrap"></p>' +
-                    '<p class="progress"><span></span></p>' +
-                    '</li>'),
+                        '<p class="title">' + file.name + '</p>' +
+                        '<p class="imgWrap"></p>' +
+                        '<p class="progress"><span></span></p>' +
+                        '</li>'),
 
                     $btns = $('<div class="file-panel">' +
-                    '<span class="cancel">' + lang.uploadDelete + '</span>' +
-                    '<span class="rotateRight">' + lang.uploadTurnRight + '</span>' +
-                    '<span class="rotateLeft">' + lang.uploadTurnLeft + '</span></div>').appendTo($li),
+                        '<span class="cancel">' + lang.uploadDelete + '</span>' +
+                        '<span class="rotateRight">' + lang.uploadTurnRight + '</span>' +
+                        '<span class="rotateLeft">' + lang.uploadTurnLeft + '</span></div>').appendTo($li),
                     $prgress = $li.find('p.progress span'),
                     $wrap = $li.find('p.imgWrap'),
                     $info = $('<p class="error"></p>').hide().appendTo($li),
@@ -641,8 +641,8 @@
                 } else {
                     stats = uploader.getStats();
                     text = lang.updateStatusFinish.replace('_', fileCount).
-                        replace('_KB', WebUploader.formatSize(fileSize)).
-                        replace('_', stats.successNum);
+                    replace('_KB', WebUploader.formatSize(fileSize)).
+                    replace('_', stats.successNum);
 
                     if (stats.uploadFailNum) {
                         text += lang.updateStatusError.replace('_', stats.uploadFailNum);
@@ -719,7 +719,7 @@
                     var responseText = (ret._raw || ret),
                         json = utils.str2json(responseText);
                     if (json.state == 'SUCCESS') {
-                        _this.imageList.push(json);
+                        $file.attr('data-src',json.url);
                         $file.append('<span class="success"></span>');
                     } else {
                         $file.find('.error').text(json.state).show();
@@ -771,15 +771,19 @@
             var i, data, list = [],
                 align = getAlign(),
                 prefix = editor.getOpt('imageUrlPrefix');
-            for (i = 0; i < this.imageList.length; i++) {
-                data = this.imageList[i];
-                list.push({
-                    src: prefix + data.url,
-                    _src: prefix + data.url,
-                    alt: data.original,
-                    floatStyle: align
-                });
-            }
+
+            var $list=$('.filelist li');
+            var len=$list.length;
+            $list.each(function(index,item){
+                if(index<len-1){
+                    list.push({
+                        src: prefix + item.getAttribute('data-src'),
+                        _src: prefix + item.getAttribute('data-src'),
+                        alt: $(item).find('.title').html(),
+                        floatStyle: ''
+                    });
+                }
+            });
             return list;
         }
     };
@@ -1037,7 +1041,7 @@
                 key = $G('searchTxt').value,
                 //type = $G('searchType').value,
                 type='&s=1&z=19';
-                keepOriginName = editor.options.keepOriginName ? "1" : "0",
+            keepOriginName = editor.options.keepOriginName ? "1" : "0",
                 url = "http://image.baidu.com/i?ct=201326592&cl=2&lm=-1&st=-1&tn=baiduimagejson&istype=2&rn=32&fm=index&pv=&word=" + key + type + "&ie=utf-8&oe=utf-8&keeporiginname=" + keepOriginName + "&" + +new Date;
 
             $G('searchListUl').innerHTML = lang.searchLoading;
